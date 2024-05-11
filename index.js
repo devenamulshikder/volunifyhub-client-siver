@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 const port = process.env.PORT || 9000;
 const app = express();
@@ -24,14 +24,28 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    const volunifyCollection = client.db("volunify").collection('post');
+    const volunifyCollection = client.db("volunify").collection("post");
 
+    app.get("/allPost", async (req, res) => {
+      const result = await volunifyCollection.find().toArray();
+      res.send(result);
+    });
 
-    app.post('/volunteerPost', async(req,res)=>{
-        const newVolunteer = req.body;
-        const result = await volunifyCollection.insertOne(newVolunteer);
-        res.send(result);
-    })
+    app.get("/volunteerNeedDetails/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await volunifyCollection.findOne(query);
+      res.send(result);
+    });
+
+    app.get()
+
+    // post
+    app.post("/volunteerPost", async (req, res) => {
+      const newVolunteer = req.body;
+      const result = await volunifyCollection.insertOne(newVolunteer);
+      res.send(result);
+    });
 
     // await client.db("admin").command({ ping: 1 });
     console.log(

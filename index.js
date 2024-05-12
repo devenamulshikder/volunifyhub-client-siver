@@ -25,6 +25,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     const volunifyCollection = client.db("volunify").collection("post");
+    const volunifyRequested = client.db("volunify").collection("requested");
 
     app.get("/allPost", async (req, res) => {
       const result = await volunifyCollection.find().toArray();
@@ -41,11 +42,26 @@ async function run() {
     app.get("/VolunteerNeedPostDetailsPage/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
-      const result = await volunifyCollection.findOne(query)
+      const result = await volunifyCollection.findOne(query);
+      res.send(result);
+    });
+
+    // get the specific user added post
+    app.get("/manageMyPost/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { userEmail: email }
+      const result = await volunifyCollection.find(query).toArray()
       res.send(result)
     });
 
-    // post
+    // post2
+    app.post("/volunteerRequested", async (req, res) => {
+      const requestedVolunteer = req.body;
+      const result = await volunifyRequested.insertOne(requestedVolunteer);
+      res.send(result);
+    });
+
+    // post1
     app.post("/volunteerPost", async (req, res) => {
       const newVolunteer = req.body;
       const result = await volunifyCollection.insertOne(newVolunteer);

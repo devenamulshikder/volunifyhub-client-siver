@@ -38,7 +38,12 @@ async function run() {
       res.send(result);
     });
 
-    app.get()
+    app.get("/VolunteerNeedPostDetailsPage/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await volunifyCollection.findOne(query)
+      res.send(result)
+    });
 
     // post
     app.post("/volunteerPost", async (req, res) => {

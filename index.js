@@ -25,6 +25,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     const volunifyCollection = client.db("volunify").collection("post");
+
     const volunifyRequested = client.db("volunify").collection("requested");
 
     app.get("/allPost", async (req, res) => {
@@ -49,10 +50,46 @@ async function run() {
     // get the specific user added post
     app.get("/manageMyPost/:email", async (req, res) => {
       const email = req.params.email;
-      const query = { userEmail: email }
-      const result = await volunifyCollection.find(query).toArray()
-      res.send(result)
+      const query = { userEmail: email };
+      const result = await volunifyCollection.find(query).toArray();
+      res.send(result);
     });
+
+    app.get("/updatePage/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await volunifyCollection.findOne(query);
+      res.send(result);
+    });
+
+    // update
+    app.put("/updatePage/:id", async (req, res) => {
+      const id = req.params.id;
+      const data = req.body;
+      // return console.log(id, data);
+      const updateDoc = {
+        $set: {
+          data,
+        },
+      };
+      const query = { _id: new ObjectId(id) };
+      const result = await volunifyCollection.updateOne(query, updateDoc);
+      res.send(result);
+    });
+
+
+// delete
+
+    app.delete("/updatePage/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await volunifyCollection.deleteOne(query);
+      res.send(result);
+    });
+
+
+
+
 
     // post2
     app.post("/volunteerRequested", async (req, res) => {

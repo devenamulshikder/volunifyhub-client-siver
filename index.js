@@ -55,6 +55,22 @@ async function run() {
       res.send(result);
     });
 
+    // get requested data for folunifyRequested collection
+    app.get("/requestedVolunteer/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { userEmail: email };
+      const result = await volunifyRequested.find(query).toArray();
+      res.send(result);
+    });
+
+    // cancel requested user
+    app.delete("/requestedVolunteer/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await volunifyRequested.deleteOne(query);
+      res.send(result);
+    });
+
     app.get("/updatePage/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -77,8 +93,7 @@ async function run() {
       res.send(result);
     });
 
-
-// delete
+    // delete
 
     app.delete("/updatePage/:id", async (req, res) => {
       const id = req.params.id;
@@ -86,10 +101,6 @@ async function run() {
       const result = await volunifyCollection.deleteOne(query);
       res.send(result);
     });
-
-
-
-
 
     // post2
     app.post("/volunteerRequested", async (req, res) => {

@@ -78,18 +78,31 @@ async function run() {
       res.send(result);
     });
 
+
     // update
     app.put("/updatePage/:id", async (req, res) => {
       const id = req.params.id;
-      const data = req.body;
-      // return console.log(id, data);
-      const updateDoc = {
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const UpdatePage = req.body;
+      const request = {
         $set: {
-          data,
+          userName: UpdatePage.userName,
+          userEmail: UpdatePage.userEmail,
+          PostTitle: UpdatePage.PostTitle,
+          Category: UpdatePage.Category,
+          Location: UpdatePage.Location,
+          date: UpdatePage.date,
+          No_of_volunteers_needed: UpdatePage.No_of_volunteers_needed,
+          Thumbnail: UpdatePage.Thumbnail,
+          description: UpdatePage.description,
         },
       };
-      const query = { _id: new ObjectId(id) };
-      const result = await volunifyCollection.updateOne(query, updateDoc);
+      const result = await volunifyCollection.updateOne(
+        filter,
+        request,
+        options
+      );
       res.send(result);
     });
 

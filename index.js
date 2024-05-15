@@ -7,10 +7,6 @@ require("dotenv").config();
 const cookieParser = require("cookie-parser");
 const port = process.env.PORT || 9000;
 const app = express();
-// const corsOptions = {
-//   origin: ["http://localhost:5173", "http://localhost:5174"],
-//   credentials: true,
-// };
 
 // app.use(cors(corsOptions));
 app.use(
@@ -19,6 +15,8 @@ app.use(
       // 'http://localhost:5173',
       "http://localhost:5173",
       "http://localhost:5174",
+      "https://volunify-hub.web.app",
+      "https://volunify-hub.firebaseapp.com/",
     ],
     credentials: true,
   })
@@ -60,8 +58,6 @@ const cookieOptions = {
   secure: process.env.NODE_ENV === "production",
   sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
 };
-//localhost:5000 and localhost:5173 are treated as same site.  so sameSite value must be strict in development server.  in production sameSite will be none
-// in development server secure will false .  in production secure will be true
 
 async function run() {
   try {
@@ -193,10 +189,64 @@ async function run() {
     // post2
     app.post("/volunteerRequested", async (req, res) => {
       const requestedVolunteer = req.body;
-
       const result = await volunifyRequested.insertOne(requestedVolunteer);
       res.send(result);
     });
+
+ 
+app.patch("/updateVolunteerCount/:id", async (req, res) => {
+  const id = req.params.id;
+  const filter = { _id: new ObjectId(id) };
+
+  try {
+    // Fetch the current document to get the string value
+    const currentDoc = await volunifyCollection.findOne(filter);
+    if (!currentDoc) {
+      return res
+        .status(404)
+        .send({ success: false, message: "Post not found" });
+    }
+
+    // Convert the string value to an integer
+    const currentVolunteersNeeded = parseInt(
+      currentDoc.No_of_volunteers_needed,
+      10
+    );
+    if (isNaN(currentVolunteersNeeded)) {
+      return res
+        .status(400)
+        .send({ success: false, message: "Invalid number format" });
+    }
+
+    // Decrement the value
+    const newVolunteersNeeded = currentVolunteersNeeded - 1;
+
+    // Update the document with the new value converted back to a string
+    const updateDoc = {
+      $set: { No_of_volunteers_needed: newVolunteersNeeded.toString() },
+    };
+
+    const result = await volunifyCollection.updateOne(filter, updateDoc);
+    if (result.modifiedCount === 1) {
+      res.send({ success: true });
+    } else {
+      res
+        .status(400)
+        .send({
+          success: false,
+          message: "Failed to update the volunteer count",
+        });
+    }
+  } catch (error) {
+    res.status(500).send({ success: false, message: "Server error" });
+  }
+});
+
+
+
+
+
+
 
     // post1
     app.post("/volunteerPost", async (req, res) => {
